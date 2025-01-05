@@ -7,8 +7,9 @@ public class Main {
         String[] line = br.readLine().split(" ");
         long[] nm = Arrays.stream(line).mapToLong(Long::parseLong).toArray();
         int root = (int) Math.sqrt(nm[1]) + 1;
+        int rootroot = (int) Math.sqrt(root) + 1;
         int[] eratos = new int[root+1];
-        for (int i = 2; i <= root; i++)
+        for (int i = 2; i <= rootroot; i++)
             if (eratos[i] == 0)
                 for (int j = i*2; j <= root; j += i)
                     eratos[j] = 1;
