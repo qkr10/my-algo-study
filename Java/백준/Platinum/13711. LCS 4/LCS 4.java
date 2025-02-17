@@ -1,4 +1,4 @@
-//1시간 30분 소요
+//1시간 20분 소요
 
 import java.util.*;
 import java.io.*;
@@ -29,16 +29,7 @@ public class Main {
                 lis[len++] = src[i];
                 continue;
             }
-            int l = 0, r = len-1;
-            while (l < r) {
-                int mid = (r + l) / 2;
-                if (lis[mid] < src[i]) {
-                    l = mid+1;
-                } else {
-                    r = mid;
-                }
-            }
-            lis[r] = src[i];
+            lis[-Arrays.binarySearch(lis, 0, len, src[i])-1] = src[i];
         }
         
         System.out.println(len);
