@@ -18,14 +18,16 @@ public class Main {
             int minPrice = (int)cur[2];
             if (city == N - 1)
                 return curCost;
-            if (visit[city][minPrice] < curCost)
+            if (curCost > visit[city][minPrice])
                 continue;
-            visit[city][minPrice] = curCost;
             minPrice = Math.min(minPrice, prices[city]);
             for (int[] neighbor : graph[city]) {
                 int n = neighbor[0];
                 int d = neighbor[1];
                 long nextCost = curCost + (long)minPrice * d;
+                if (nextCost >= visit[n][minPrice])
+                    continue;
+                visit[n][minPrice] = nextCost;
                 q.add(new long[]{nextCost, n, minPrice});
             }
         }
