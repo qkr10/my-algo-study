@@ -1,4 +1,4 @@
-//1시간 21분 소요
+//1시간 51분 소요
 
 import java.util.*;
 import java.io.*;
