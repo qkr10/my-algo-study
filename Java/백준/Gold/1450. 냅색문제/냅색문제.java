@@ -8,6 +8,11 @@
 //2. N==1 일때 예외처리를 했어야 함. 그렇지 않으면 크기가 0인 배열을 만들게 됨.
 //3. nextPermutation() 에서 permu[l+1:l+1+n-r] 은 true 로 채우고, 그 뒤는 false로 채워야 한다고 생각했음.
 
+//13분동안 nextPermutation() 말고 재귀적으로 구현함. 훨씬 직관적이고 편하다.
+//이후 10분동안 또 디버깅함. 지역변수 C에만 값이 들어가고 필드 C에는 값이 설정되지 않은것이 원인이다.
+//무작정 변수 출력부터 해보다가, 차분하게 다시 코드를 읽어보려 하자마자 문제점을 찾을수 있었다.
+//결과론적으로 보면, 언제나 1이 나오던 이유가 무엇인지 이해하려 했어도 문제를 찾을수 있었을것 같다.
+
 import java.util.*;
 import java.io.*;
 
@@ -20,32 +25,55 @@ public class Main{
         return ret;
     }
     
-    static boolean nextPermutation(boolean[] permu) {
-        int n = permu.length;
-        int l = n - 2;
-        while (l >= 0 && !(!permu[l] && permu[l+1]))
-            l--;
-        if (l == -1)
-            return false;
+    static int[] arr;
+    static TreeMap<Long, Integer> map;
+    static void makePermutation1(boolean[] permu, int current, int remain) {
+        if (remain == 0) {
+            long s = sum(arr, 0, permu);
+            var val = map.get(s);
+            if (val == null)
+                val = 1;
+            else
+                val++;
+            map.put(s, val);
+            return;
+        }
         
-        int r = l+1;
-        while (r+1 < n && !(permu[r] && !permu[r+1]))
-            r++;
+        remain--;
+        for (int i = current; i < permu.length - remain; i++) {
+            permu[i] = true;
+            makePermutation1(permu, i+1, remain);
+            permu[i] = false;
+        }
+    }
+    
+    static int left, right, C, ans;
+    static int[] prefixSum;
+    static void makePermutation2(boolean[] permu, int current, int remain) {
+        if (remain == 0) {
+            long s = sum(arr, left, permu);
+            var entry = map.floorEntry(C - s);
+            if (entry == null)
+                return;
+            else
+                ans += prefixSum[entry.getValue()];
+            return;
+        }
         
-        permu[l] = true;
-        
-        //permu[l+1:] 에서 첫 n-r 개 원소는 false 여야 함. 나머지는 true
-        Arrays.fill(permu, l+1, l+1 + n-r, false);
-        Arrays.fill(permu, l+1 + n-r, n, true);
-        return true;
+        remain--;
+        for (int i = current; i < permu.length - remain; i++) {
+            permu[i] = true;
+            makePermutation2(permu, i+1, remain);
+            permu[i] = false;
+        }
     }
     
     public static void main(String[] args) throws IOException {
         var br = new BufferedReader(new InputStreamReader(System.in));
         var st = new StringTokenizer(br.readLine());
         int N = Integer.parseInt(st.nextToken());
-        int C = Integer.parseInt(st.nextToken());
-        int[] arr = new int[N];
+        C = Integer.parseInt(st.nextToken());
+        arr = new int[N];
         st = new StringTokenizer(br.readLine());
         for (int i = 0; i < N; i++) {
             arr[i] = Integer.parseInt(st.nextToken());
@@ -61,25 +89,15 @@ public class Main{
             return;
         }
         
-        int left = N/2, right = N/2 + N%2;
+        left = N/2;
+        right = N - left;
         
         boolean[] permu = new boolean[left];
-        TreeMap<Long, Integer> map = new TreeMap<>();
-        for (int i = 0; i <= left; i++) {
-            Arrays.fill(permu, 0, left - i, false);
-            Arrays.fill(permu, left - i, left, true);
-            do {
-                long s = sum(arr, 0, permu);
-                var val = map.get(s);
-                if (val == null)
-                    val = 1;
-                else
-                    val++;
-                map.put(s, val);
-            } while (nextPermutation(permu));
-        }
+        map = new TreeMap<>();
+        for (int i = 0; i <= left; i++)
+            makePermutation1(permu, 0, i);
         
-        int[] prefixSum = new int[map.size()+1];
+        prefixSum = new int[map.size()+1];
         int idx = 1;
         for (var entry : map.entrySet()) {
             long key = entry.getKey();
@@ -90,19 +108,9 @@ public class Main{
         }
         
         permu = new boolean[right];
-        int ans = 0;
-        for (int i = 0; i <= right; i++) {
-            Arrays.fill(permu, 0, right - i, false);
-            Arrays.fill(permu, right - i, right, true);
-            do {
-                long s = sum(arr, left, permu);
-                var entry = map.floorEntry(C - s);
-                if (entry == null)
-                    continue;
-                else
-                    ans += prefixSum[entry.getValue()];
-            } while (nextPermutation(permu));
-        }
+        for (int i = 0; i <= right; i++)
+            makePermutation2(permu, 0, i);
+        
         System.out.println(ans);
     }
 }
