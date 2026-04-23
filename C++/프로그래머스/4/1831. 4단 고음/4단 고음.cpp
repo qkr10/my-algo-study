@@ -5,10 +5,6 @@
 using namespace std;
 
 using ll = long long;
-using vi = vector<int>;
-using mvii = map<vi, int>;
-
-mvii visit;
 
 int reverse_count(int n, int remain_star, int count_plus) {
     if (n == 1) {
@@ -17,21 +13,15 @@ int reverse_count(int n, int remain_star, int count_plus) {
         return 1;
     }
     
-    vi key{n, count_plus};
-    if (visit.find(key) != visit.end())
-        return visit[key];
-    
     int ret = 0;
     if (remain_star > 0 && count_plus >= 2 && n % 3 == 0)
     	ret += reverse_count(n / 3, remain_star - 1, count_plus - 2);
     if (remain_star * 2 > count_plus)
 	    ret += reverse_count(n - 1, remain_star, count_plus + 1);
-    return visit[key] = ret;
+    return ret;
 }
 
 int solution(int n) {
-    visit = mvii();
-    
     int star = 1;
     for (; star < 30; star++) {
         ll min_count = pow(3, star) + 2 * star;
